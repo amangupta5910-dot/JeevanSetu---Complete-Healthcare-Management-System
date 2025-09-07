@@ -1,0 +1,355 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  phone     String?
+  address   String?
+  role      UserRole @default(PATIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  ambulanceBookings AmbulanceBooking[]
+  doctorAppointments DoctorAppointment[]
+  videoConsultations VideoConsultation[]
+  medicineOrders    MedicineOrder[]
+  reviews           Review[]
+  payments          Payment[]
+
+  @@map("users")
+}
+
+model Hospital {
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  phone       String?
+  email       String?
+  latitude    Float?
+  longitude   Float?
+  description String?
+  image       String?
+  rating      Float    @default(0)
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  doctors         Doctor[]
+  ambulances      Ambulance[]
+  medicines       Medicine[]
+  reviews         Review[] @relation("HospitalReview")
+  ambulanceBookings AmbulanceBooking[]
+
+  @@map("hospitals")
+}
+
+model Doctor {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  phone       String?
+  specialization String
+  experience  Int      // in years
+  fee         Float
+  rating      Float    @default(0)
+  verified    Boolean  @default(false)
+  hospitalId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  hospital           Hospital           @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  appointments       DoctorAppointment[]
+  videoConsultations VideoConsultation[]
+  reviews            Review[] @relation("DoctorReview")
+
+  @@map("doctors")
+}
+
+model Ambulance {
+  id          String   @id @default(cuid())
+  vehicleNumber String
+  type        AmbulanceType
+  driverName  String
+  driverPhone String
+  status      AmbulanceStatus @default(AVAILABLE)
+  latitude    Float?
+  longitude   Float?
+  hospitalId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  hospital  Hospital           @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  bookings  AmbulanceBooking[]
+
+  @@map("ambulances")
+}
+
+model Medicine {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  stock       Int      @default(0)
+  requiresPrescription Boolean @default(false)
+  image       String?
+  category    String?
+  hospitalId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  hospital Hospital          @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  orderItems MedicineOrderItem[]
+
+  @@map("medicines")
+}
+
+model AmbulanceBooking {
+  id            String            @id @default(cuid())
+  patientName   String
+  patientPhone  String
+  pickupAddress String
+  pickupLat     Float?
+  pickupLng     Float?
+  destination   String?
+  destinationLat Float?
+  destinationLng Float?
+  emergencyType String?
+  status        BookingStatus     @default(REQUESTED)
+  estimatedTime Int?              // in minutes
+  estimatedCost Float?
+  actualCost    Float?
+  paymentStatus PaymentStatus @default(PENDING)
+  userId        String?
+  hospitalId    String?
+  ambulanceId   String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  // Relations
+  user      User?      @relation(fields: [userId], references: [id])
+  hospital  Hospital?  @relation(fields: [hospitalId], references: [id])
+  ambulance Ambulance? @relation(fields: [ambulanceId], references: [id])
+  payments  Payment[] @relation("AmbulancePayment")
+
+  @@map("ambulance_bookings")
+}
+
+model DoctorAppointment {
+  id          String             @id @default(cuid())
+  patientName String
+  patientPhone String
+  patientEmail String?
+  date        DateTime
+  timeSlot    String
+  status      AppointmentStatus  @default(REQUESTED)
+  symptoms    String?
+  notes       String?
+  fee         Float?
+  paymentStatus PaymentStatus @default(PENDING)
+  userId      String?
+  doctorId    String
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  // Relations
+  user   User?   @relation(fields: [userId], references: [id])
+  doctor Doctor  @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  payments Payment[] @relation("DoctorAppointmentPayment")
+
+  @@map("doctor_appointments")
+}
+
+model VideoConsultation {
+  id          String              @id @default(cuid())
+  patientName String
+  patientPhone String
+  patientEmail String
+  scheduledAt DateTime
+  duration    Int                 // in minutes
+  status      ConsultationStatus  @default(REQUESTED)
+  symptoms    String?
+  meetingLink String?
+  fee         Float?
+  paymentStatus PaymentStatus @default(PENDING)
+  userId      String?
+  doctorId    String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  // Relations
+  user   User?   @relation(fields: [userId], references: [id])
+  doctor Doctor  @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  payments Payment[] @relation("VideoConsultationPayment")
+
+  @@map("video_consultations")
+}
+
+model MedicineOrder {
+  id          String          @id @default(cuid())
+  patientName String
+  patientPhone String
+  deliveryAddress String
+  status      OrderStatus     @default(REQUESTED)
+  totalAmount Float
+  deliveryFee Float           @default(0)
+  paymentStatus PaymentStatus @default(PENDING)
+  userId      String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Relations
+  user        User?                  @relation(fields: [userId], references: [id])
+  orderItems  MedicineOrderItem[]
+  payments    Payment[] @relation("MedicineOrderPayment")
+
+  @@map("medicine_orders")
+}
+
+model MedicineOrderItem {
+  id          String   @id @default(cuid())
+  quantity    Int
+  price       Float
+  medicineId  String
+  orderId     String
+  createdAt   DateTime @default(now())
+
+  // Relations
+  medicine Medicine       @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+  order    MedicineOrder  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("medicine_order_items")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      // 1-5
+  comment   String?
+  userId    String
+  reviewableId String
+  reviewableType String // "HOSPITAL" or "DOCTOR"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hospital Hospital?  @relation("HospitalReview", fields: [reviewableId], references: [id], onDelete: Cascade)
+  doctor   Doctor?    @relation("DoctorReview", fields: [reviewableId], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  amount        Float
+  currency      String   @default("INR")
+  paymentMethod String
+  orderId       String
+  serviceType   ServiceType
+  status        PaymentStatus @default(PENDING)
+  transactionId String?
+  userId        String?
+  patientDetails Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  processedAt   DateTime?
+
+  // Relations
+  user                User?               @relation(fields: [userId], references: [id])
+  ambulanceBooking    AmbulanceBooking?    @relation("AmbulancePayment", fields: [orderId], references: [id])
+  doctorAppointment  DoctorAppointment?  @relation("DoctorAppointmentPayment", fields: [orderId], references: [id])
+  videoConsultation   VideoConsultation?   @relation("VideoConsultationPayment", fields: [orderId], references: [id])
+  medicineOrder       MedicineOrder?       @relation("MedicineOrderPayment", fields: [orderId], references: [id])
+
+  @@map("payments")
+}
+
+enum UserRole {
+  PATIENT
+  DOCTOR
+  HOSPITAL_STAFF
+  ADMIN
+}
+
+enum AmbulanceType {
+  BASIC
+  ADVANCED
+  ICU
+  MORTUARY
+}
+
+enum AmbulanceStatus {
+  AVAILABLE
+  ON_DUTY
+  MAINTENANCE
+  UNAVAILABLE
+}
+
+enum BookingStatus {
+  REQUESTED
+  ACCEPTED
+  ON_THE_WAY
+  PICKED_UP
+  REACHED_HOSPITAL
+  COMPLETED
+  CANCELLED
+}
+
+enum AppointmentStatus {
+  REQUESTED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum ConsultationStatus {
+  REQUESTED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum OrderStatus {
+  REQUESTED
+  CONFIRMED
+  PREPARING
+  READY_FOR_PICKUP
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum ServiceType {
+  DOCTOR_APPOINTMENT
+  VIDEO_CONSULTATION
+  MEDICINE_ORDER
+  AMBULANCE_BOOKING
+}
+
