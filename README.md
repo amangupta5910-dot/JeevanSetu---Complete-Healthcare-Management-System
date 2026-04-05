@@ -1,4 +1,4 @@
-# MediCare - Complete Healthcare Management System
+# JeevanSetu - Complete Healthcare Management System
 
 A comprehensive ambulance booking and tracking system with additional healthcare features including doctor appointments, video consultations, hospital directory, and medicine delivery.
 
