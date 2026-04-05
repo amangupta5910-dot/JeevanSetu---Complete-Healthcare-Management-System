@@ -14,21 +14,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Z.ai Code Scaffold - AI-Powered Development",
-  description: "Modern Next.js scaffold optimized for AI-powered development with Z.ai. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
-  keywords: ["Z.ai", "Next.js", "TypeScript", "Tailwind CSS", "shadcn/ui", "AI development", "React"],
-  authors: [{ name: "Z.ai Team" }],
+  title: "JeevanSetu.in - Powered By JeevanSetu",
+  description: "Modern Next.js JeevanSetu.in. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
+  keywords: ["JeevanSetu.in", "Next.js", "TypeScript", "Tailwind CSS", "shadcn/ui", "Powered By JeevanSetu", "React"],
+  authors: [{ name: "Aman Gupta Team" }],
   openGraph: {
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
-    url: "https://chat.z.ai",
-    siteName: "Z.ai",
+    title: "JeevanSetu.in",
+    description: "Powered By JeevanSetu with modern React stack",
+    url: "https://JeevanSetu.in",
+    siteName: "JeevanSetu.in",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
+    title: "JeevanSetu.in",
+    description: "Powered By JeevanSetu with modern React stack",
   },
 };
 
