@@ -1,6 +1,6 @@
 # JeevanSetu - Complete Healthcare Management System
 
-A comprehensive ambulance booking and tracking system with additional healthcare features including doctor appointments, video consultations, hospital directory, and medicine delivery.
+ JeevanSetu is A comprehensive full-stack healthcare platform built with Next.js 15, TypeScript, and Prisma. This system provides ambulance booking with real-time tracking, doctor appointments, video consultations, hospital directory, and medicine delivery services.
 
 ## 🚀 Features
 
