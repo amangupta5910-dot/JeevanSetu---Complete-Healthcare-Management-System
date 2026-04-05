@@ -120,7 +120,7 @@ npm run db:setup
 npm run dev
 ```
 
-The application will be available at http://[localhost:3000](http://192.168.1.5:3000/)
+The application will be available at http://localhost:3000 (http://192.168.1.5:3000/)
 
 ## 🗂️ Project Structure
 
